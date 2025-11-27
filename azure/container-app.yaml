@@ -1,0 +1,55 @@
+# Azure Container Apps configuration for Deep RAG API
+apiVersion: 2023-05-01
+kind: containerApp
+metadata:
+  name: deep-rag-api
+  resourceGroup: deep-rag-rg
+properties:
+  managedEnvironmentId: /subscriptions/{subscription-id}/resourceGroups/deep-rag-rg/providers/Microsoft.App/managedEnvironments/deep-rag-env
+  configuration:
+    ingress:
+      external: true
+      targetPort: 8000
+      allowInsecure: false
+      transport: http
+    registries: []
+    secrets: []
+  template:
+    containers:
+      - name: deep-rag-api
+        image: {container-registry}/deep-rag-api:latest
+        resources:
+          cpu: 1.0
+          memory: 2Gi
+        env:
+          - name: API_HOST
+            value: "0.0.0.0"
+          - name: API_PORT
+            value: "8000"
+          - name: LOG_LEVEL
+            value: "INFO"
+          - name: LOG_FORMAT
+            value: "json"
+          - name: CORS_ORIGINS
+            value: "*"
+          - name: AZURE_OPENAI_API_KEY
+            secretRef: azure-openai-api-key
+          - name: AZURE_OPENAI_ENDPOINT
+            secretRef: azure-openai-endpoint
+          - name: AZURE_OPENAI_DEPLOYMENT_NAME
+            secretRef: azure-openai-deployment-name
+          - name: TAVILY_API_KEY
+            secretRef: tavily-api-key
+          - name: LLM_PROVIDER
+            value: "azure_openai"
+          - name: EMBEDDING_PROVIDER
+            value: "azure_openai"
+    scale:
+      minReplicas: 1
+      maxReplicas: 5
+      rules:
+        - name: http-rule
+          http:
+            metadata:
+              concurrentRequests: "10"
+

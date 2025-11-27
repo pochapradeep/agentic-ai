@@ -9,11 +9,28 @@ A production-grade Retrieval-Augmented Generation (RAG) system with advanced rea
 - **Energy Sector Focus**: Optimized for green hydrogen and energy transition documents
 - **Comprehensive Evaluation**: Multiple metrics including RAGAS-style evaluation
 - **Azure OpenAI Integration**: Supports Azure OpenAI for LLM and embeddings
+- **REST API**: FastAPI-based REST API with synchronous and streaming endpoints
+- **Azure Deployment**: Ready for deployment to Azure Container Apps
+- **Production Ready**: Docker containerization, logging, error handling, and health checks
 
 ## Project Structure
 
 ```
 agentic-ai-deep-rag/
+├── api/                     # FastAPI application
+│   ├── main.py             # FastAPI app initialization
+│   ├── models.py           # Pydantic models
+│   ├── service.py          # Deep RAG service wrapper
+│   ├── streaming.py        # SSE streaming implementation
+│   ├── config.py           # API configuration
+│   ├── exceptions.py       # Custom exceptions
+│   ├── logging_config.py   # Logging setup
+│   └── routers/            # API routers
+│       └── query.py        # Query endpoints
+├── azure/                   # Azure deployment files
+│   ├── container-app.yaml  # Container Apps config
+│   ├── deploy.sh           # Deployment script
+│   └── README.md           # Deployment guide
 ├── data/                    # Document data folder
 ├── src/                     # Source code modules
 │   ├── config.py           # Configuration management
@@ -22,11 +39,18 @@ agentic-ai-deep-rag/
 │   ├── vector_store.py     # Vector store management
 │   ├── retrieval.py        # Advanced retrieval strategies
 │   ├── rag_chain.py        # RAG chain creation
+│   ├── deep_rag.py         # Deep RAG system
 │   ├── evaluation.py       # Evaluation metrics
 │   └── utils.py            # Utility functions
 ├── notebooks/              # Jupyter notebooks
-├── scripts/                # Utility scripts
-└── tests/                  # Test files
+├── scripts/                 # Utility scripts
+│   ├── run_basic_rag.py    # Basic RAG script
+│   ├── run_deep_rag.py     # Deep RAG script
+│   ├── run_api.py          # API server script
+│   └── evaluate_rag.py     # Evaluation script
+├── tests/                   # Test files
+├── Dockerfile               # Docker container definition
+└── main.py                  # API entry point
 ```
 
 ## Installation
@@ -71,6 +95,72 @@ TAVILY_API_KEY=your-tavily-key
 ```
 
 ## Usage
+
+### API Server (Recommended for Production)
+
+The Deep RAG system is available as a FastAPI REST API that can be deployed to Azure Container Apps.
+
+#### Local Development
+
+1. **Start the API server:**
+```bash
+python scripts/run_api.py --reload
+```
+
+Or using the main entry point:
+```bash
+python main.py
+```
+
+2. **Access the API:**
+- API Documentation: http://localhost:8000/docs
+- Health Check: http://localhost:8000/health
+- API Base: http://localhost:8000/api/v1
+
+3. **Test the API:**
+```bash
+# Using the test script (recommended)
+python scripts/test_api.py
+
+# Or using curl
+# Synchronous query
+curl -X POST "http://localhost:8000/api/v1/query" \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What are green hydrogen cost benchmarks?"}'
+
+# Streaming query
+curl -X POST "http://localhost:8000/api/v1/query/stream" \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What are green hydrogen cost benchmarks?"}' \
+  --no-buffer
+```
+
+#### Docker Deployment
+
+1. **Build the Docker image:**
+```bash
+docker build -t deep-rag-api .
+```
+
+2. **Run the container:**
+```bash
+docker run -p 8000:8000 \
+  -e AZURE_OPENAI_API_KEY=your-key \
+  -e AZURE_OPENAI_ENDPOINT=your-endpoint \
+  deep-rag-api
+```
+
+#### Azure Container Apps Deployment
+
+See [azure/README.md](azure/README.md) for detailed deployment instructions.
+
+Quick deployment:
+```bash
+cd azure
+./deploy.sh
+```
+
+For full API documentation, see [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
 
 ### Running the Notebook
 

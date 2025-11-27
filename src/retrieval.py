@@ -1,7 +1,23 @@
 """Advanced retrieval strategies including hybrid search."""
-import numpy as np
+import os
+import subprocess
+import sys
 from typing import List, Optional
-from rank_bm25 import BM25Okapi
+
+# Fix OpenMP conflict on macOS (must be before any imports that use OpenMP)
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+
+# Ensure rank_bm25 is available
+try:
+    from rank_bm25 import BM25Okapi
+except ImportError:
+    print("Installing rank-bm25...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "rank-bm25"])
+    from rank_bm25 import BM25Okapi
+    print("✓ rank-bm25 installed successfully")
+
+import numpy as np
 from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
 from langchain_core.embeddings import Embeddings

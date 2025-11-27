@@ -1,8 +1,26 @@
 """Evaluation metrics and comparison utilities."""
+import os
 import re
+import subprocess
+import sys
 from typing import List, Dict, Any
+
+# Fix OpenMP conflict on macOS (must be before any imports that use OpenMP)
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+
+# Ensure pandas is available
+try:
+    import pandas as pd
+except ImportError:
+    print("Installing pandas...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "pandas"])
+    import pandas as pd
+    print("✓ pandas installed successfully")
+
+# Note: numpy will be installed automatically as a pandas dependency
+
 from langchain_core.documents import Document
-import pandas as pd
 
 
 def comprehensive_evaluation(
